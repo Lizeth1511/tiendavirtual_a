@@ -55,12 +55,9 @@ def inicio():
         return redirect('/productos')
     return render_template('login.html')
 # Ruta de productos
-@app.route('/productos', methods=['GET'])
-def obtener_productos():
-    productos = [
-        {"id": 1, "nombre": "Laptop", "precio": 1200},
-        {"id": 2, "nombre": "Mouse", "precio": 25}
-    ]
+@app.route('/productos')
+def mostrar_productos():
+    return render_template('productos.html', productos=productos)
     return jsonify(productos)
 
 if __name__ == '__main__':
