@@ -91,6 +91,7 @@ def registro():
     if Usuario.registrar(correo, contrasena):
         return redirect('/')
     return redirect('/')
+from flask_login import login_required
 
 @app.route('/productos/<id>', methods=['GET'])
 def leer_tablas(id):
