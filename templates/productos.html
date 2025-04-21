@@ -194,7 +194,29 @@ table td:nth-child(6) {
                 padding: 2rem 1rem;
             }
         }
-    </style>  
+    </style> 
+    <!-- En tu archivo index.html -->
+<button id="btnProductos">Ver Productos</button>
+<div id="lista-productos"></div>
+
+<script>
+document.getElementById('btnProductos').addEventListener('click', async () => {
+    try {
+        const response = await fetch('https://tu-api.onrender.com/productos');
+        const productos = await response.json();
+        
+        let html = '<h2>Productos</h2><ul>';
+        productos.forEach(p => {
+            html += `<li>${p.nombre} - $${p.precio}</li>`;
+        });
+        html += '</ul>';
+        
+        document.getElementById('lista-productos').innerHTML = html;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+</script>
 </head>
 <body>
     <div class="header">
