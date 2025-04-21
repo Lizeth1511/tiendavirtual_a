@@ -7,7 +7,8 @@ import os
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
-
+with app.app_context():
+    os.create_all()  # Crea las tablas si no existen
 # Configuración PostgreSQL
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
