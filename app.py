@@ -115,7 +115,6 @@ def registrar_producto():
     precio = request.form.get('precio')
     descripcion = request.form.get('descripcion')
     stock = request.form.get('stock')
-       return jsonify(productos)
     if not nombre:
         return "El campo nombre es obligatorio", 400
 
