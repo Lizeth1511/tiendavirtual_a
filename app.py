@@ -62,7 +62,9 @@ productos = [
 @app.route('/productos')
 def mostrar_productos():
      productos = Producto.query.all()
-    return render_template('productos.html')
+    return render_template('productos.html', productos=productos)
+
+
     app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
     
 @app.route('/login', methods=['POST'])
