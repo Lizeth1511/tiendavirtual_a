@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="/static/estilos.css"> <!-- si separás los estilos -->
+</head>
+<body>
+    <div class="seccion">
+        <h2>Editar Producto</h2>
+        <form method="POST">
+            <div class="formulario">
+                <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+                <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
+                <textarea name="descripcion" required>{{ producto.descripcion }}</textarea>
+                <input type="number" name="stock" value="{{ producto.stock }}" required>
+                <button type="submit">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
