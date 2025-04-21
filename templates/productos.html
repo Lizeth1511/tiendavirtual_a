@@ -195,14 +195,13 @@ table td:nth-child(6) {
             }
         }
     </style> 
-    <!-- En tu archivo index.html -->
 <button id="btnProductos">Ver Productos</button>
 <div id="lista-productos"></div>
 
 <script>
 document.getElementById('btnProductos').addEventListener('click', async () => {
     try {
-        const response = await fetch('https://tu-api.onrender.com/productos');
+        const response = await fetch('https://tiendavirtual-a-15.onrender.com/productos');
         const productos = await response.json();
         
         let html = '<h2>Productos</h2><ul>';
@@ -223,45 +222,114 @@ document.getElementById('btnProductos').addEventListener('click', async () => {
         <h2>Bienvenido, {{ session.correo }}</h2>
         <a href="/logout" class="logout-link">Cerrar sesión</a>
     </div>
-    
-    <div class="seccion">
-        <h2>Gestión de Productos</h2>
-        <form action="/productos" method="post">
-            <div class="formulario">
-                <input type="text" name="nombre" placeholder="Nombre" required>
-                <input type="number" name="precio" placeholder="Precio" step="0.01" required>
-                <textarea name="descripcion" placeholder="Descripción" required></textarea>
-                <input type="number" name="stock" placeholder="Stock" required>
-                <a href="{{ url_for('agregar_producto') }}" class="btn-agregar">Agregar Producto</a>
-            </div>
-        </form>  
-    </div>
-    
-    <h3>Lista De Productos</h3>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Descripción</th>
-            <th>Stock</th>
-            <th>Acciones</th>
-        </tr>
-        {% for producto in productos %}
-        <tr>
-            <td>{{ producto.id }}</td>
-            <td>{{ producto.nombre }}</td>
-            <td>{{ producto.precio }}</td>
-            <td>{{ producto.descripcion }}</td>
-            <td>{{ producto.stock }}</td>
-            <td>
-              <a href="{{ url_for('editar_producto', id=producto.id) }}" class="btn-editar">Editar</a>
-            <form action="{{ url_for('eliminar_producto', id=producto.id) }}" method="POST" style="display:inline;">
-             <button type="submit" class="btn-eliminar" onclick="return confirm('¿Eliminar este producto?')">Eliminar</button>
+    <div class="container">
+        <!-- Sección de Agregar Producto -->
+        <div class="formulario-crud">
+            <h2>Agregar Nuevo Producto</h2>
+            <form method="POST" action="/agregar-producto">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" name="nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Precio:</label>
+                    <input type="number" name="precio" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea name="descripcion" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock:</label>
+                    <input type="number" name="stock" required>
+                </div>
+
+                <button type="submit" class="btn btn-guardar">Guardar Producto</button>
             </form>
-           </td>
-        </tr>
-        {% endfor %}
-    </table>
+        </div>
+
+        <!-- Lista de Productos -->
+        <h2>Productos Existentes</h2>
+        <table class="tabla-productos">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Descripción</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.nombre }}</td>
+                    <td>${{ producto.precio }}</td>
+                    <td>{{ producto.descripcion }}</td>
+                    <td>{{ producto.stock }}</td>
+                    <td>
+                        <a href="/editar-producto/{{ producto.id }}" class="btn btn-editar">Editar</a>
+                        <form action="/eliminar-producto/{{ producto.id }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-eliminar" 
+                                    onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Edición (Usando tu template) -->
+    <div id="modalEdicion" class="modal">
+        <div class="modal-contenido">
+            {% if producto %}
+            <h2>Editar Producto</h2>
+            <form method="POST" action="/editar-producto/{{ producto.id }}">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Precio:</label>
+                    <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea name="descripcion" required>{{ producto.descripcion }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock:</label>
+                    <input type="number" name="stock" value="{{ producto.stock }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-guardar">Actualizar</button>
+                <button type="button" class="btn btn-eliminar" 
+                        onclick="document.getElementById('modalEdicion').style.display='none'">
+                    Cancelar
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Mostrar modal al hacer clic en Editar
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('modalEdicion').style.display = 'flex';
+                window.location.href = btn.href;
+            });
+        });
+    </script>
 </body>
 </html>
