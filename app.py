@@ -5,7 +5,8 @@ import bcrypt
 import os
 
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_simple'
+
+app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
 
 # Configuración PostgreSQL
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -60,12 +61,16 @@ def login():
     contrasena = request.form['contrasena'].strip()
 
     if not correo or not contrasena:
+          print("Correo o contraseña vacíos")
         return redirect('/')
 
     if Usuario.login(correo, contrasena):
         session['logueado'] = True
         session['correo'] = correo
+         print("Login exitoso, redirigiendo a /productos")
         return redirect('/productos')
+
+     print("Login fallido")
     return redirect('/')
 
 @app.route('/registro', methods=['POST'])
@@ -83,6 +88,7 @@ def registro():
 @app.route('/productos')
 def productos():
     if 'logueado' not in session:
+        print("Usuario no logueado, redirigiendo a /")
         return redirect('/')
     conn = get_db_connection()
     cur = conn.cursor()
@@ -90,7 +96,11 @@ def productos():
     productos = cur.fetchall()
     cur.close()
     conn.close()
+    print("Productos encontrados:", productos)
     return render_template('productos.html', productos=productos)
+ except Exception as e:
+        print("Error cargando productos:", e)
+        return "Error en productos"
 
 @app.route('/tablas/<id>', methods=['GET'])
 def leer_tablas(id):
