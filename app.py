@@ -1,5 +1,6 @@
 from flask import Flask, flash, jsonify, render_template, request, redirect, session, url_for
 import psycopg2
+from flask_login import login_required
 import psycopg2.extras
 import bcrypt
 import os
@@ -91,7 +92,6 @@ def registro():
     if Usuario.registrar(correo, contrasena):
         return redirect('/')
     return redirect('/')
-from flask_login import login_required
 
 @app.route('/productos/<id>', methods=['GET'])
 def leer_tablas(id):
