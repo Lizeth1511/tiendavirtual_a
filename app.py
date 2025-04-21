@@ -54,7 +54,18 @@ def inicio():
     if 'logueado' in session:
         return redirect('/productos')
     return render_template('login.html')
+# Ruta de productos
+@app.route('/productos', methods=['GET'])
+def obtener_productos():
+    productos = [
+        {"id": 1, "nombre": "Laptop", "precio": 1200},
+        {"id": 2, "nombre": "Mouse", "precio": 25}
+    ]
+    return jsonify(productos)
 
+if __name__ == '__main__':
+    app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
+    
 @app.route('/login', methods=['POST'])
 def login():
     correo = request.form['correo'].strip()
@@ -81,7 +92,7 @@ def registro():
         return redirect('/')
     return redirect('/')
 
-@app.route('/tablas/<id>', methods=['GET'])
+@app.route('/productos/<id>', methods=['GET'])
 def leer_tablas(id):
     try:
         conn = get_db_connection()
