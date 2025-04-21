@@ -81,19 +81,6 @@ def registro():
         return redirect('/')
     return redirect('/')
 
-@app.route('/productos')
-def productos():
-    if 'logueado' not in session:
-        return redirect('/')
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM productos")
-    productos = cur.fetchall()
-    cur.close()
-    conn.close()
-    print("Productos encontrados:", productos)
-    return render_template('productos.html', productos=productos)
-    
 @app.route('/tablas/<id>', methods=['GET'])
 def leer_tablas(id):
     try:
