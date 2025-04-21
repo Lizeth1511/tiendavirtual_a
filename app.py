@@ -40,6 +40,7 @@ class Usuario:
             cursor = mysql.connection.cursor()
             cursor.execute("SELECT * FROM usuarios WHERE correo = %s", (correo,))
             usuario = cursor.fetchone()
+             print("Usuario obtenido de BD:", usuario)
             if usuario and bcrypt.checkpw(contrasena.encode('utf-8'), usuario['contrasena'].encode('utf-8')):
                 return True
         except Exception as e:
@@ -56,14 +57,15 @@ def inicio():
 def login():
     correo = request.form['correo'].strip()
     contrasena = request.form['contrasena'].strip()
-    
+    print("Intentando login con:", correo)
     if not correo or not contrasena:
         return redirect('/')
     
     if Usuario.login(correo, contrasena):
         session['logueado'] = True
         session['correo'] = correo
-        return redirect('/productos')
+        return redirect('/productos')  
+    print("Login fallido")
     return redirect('/')
 
 @app.route('/registro', methods=['POST'])
