@@ -195,9 +195,6 @@ table td:nth-child(6) {
             }
         }
     </style> 
-<button id="btnProductos">Ver Productos</button>
-<div id="lista-productos"></div>
-
 <script>
 document.getElementById('btnProductos').addEventListener('click', async () => {
     try {
@@ -271,8 +268,8 @@ document.getElementById('btnProductos').addEventListener('click', async () => {
                     <td>{{ producto.descripcion }}</td>
                     <td>{{ producto.stock }}</td>
                     <td>
-                        <a href="/editar-producto/{{ producto.id }}" class="btn btn-editar">Editar</a>
-                        <form action="/eliminar-producto/{{ producto.id }}" method="POST" style="display:inline;">
+                        <a href="/editar_producto/{{ producto.id }}" class="btn btn-editar">Editar</a>
+                        <form action="/eliminar_producto/{{ producto.id }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-eliminar" 
                                     onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
                                 Eliminar
@@ -290,7 +287,7 @@ document.getElementById('btnProductos').addEventListener('click', async () => {
         <div class="modal-contenido">
             {% if producto %}
             <h2>Editar Producto</h2>
-            <form method="POST" action="/editar-producto/{{ producto.id }}">
+            <form method="POST" action="/editar_producto/{{ producto.id }}">
                 <div class="form-group">
                     <label>Nombre:</label>
                     <input type="text" name="nombre" value="{{ producto.nombre }}" required>
