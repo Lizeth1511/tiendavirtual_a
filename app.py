@@ -7,8 +7,6 @@ import os
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
-with app.app_context():
-    os.create_all()  # Crea las tablas si no existen
 # Configuración PostgreSQL
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -58,9 +56,9 @@ def inicio():
 # Ruta de productos
 @app.route('/productos')
 def mostrar_productos():
-    return render_template('productos.html', productos=productos)
-    return jsonify(productos)
-
+    [
+        {"id": 1, "nombre": "Producto Demo", "precio": 10.99}
+    ]
 if __name__ == '__main__':
     app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
     
