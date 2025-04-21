@@ -61,6 +61,7 @@ productos = [
 
 @app.route('/productos')
 def mostrar_productos():
+     productos = Producto.query.all()
     return render_template('productos.html', productos=productos)
     app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
     
@@ -105,11 +106,6 @@ def leer_tablas(id):
             return jsonify({'mensaje': "Producto no encontrado."})
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
-
-@app.route('/productos')
-def mostrar_productos():
-    productos = Producto.query.all()
-    return render_template('productos.html', productos=productos)
 
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
