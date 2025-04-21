@@ -232,7 +232,7 @@ document.getElementById('btnProductos').addEventListener('click', async () => {
                 <input type="number" name="precio" placeholder="Precio" step="0.01" required>
                 <textarea name="descripcion" placeholder="Descripción" required></textarea>
                 <input type="number" name="stock" placeholder="Stock" required>
-                <button type="submit">Agregar Producto</button>
+                <a href="{{ url_for('agregar_producto') }}" class="btn-agregar">Agregar Producto</a>
             </div>
         </form>  
     </div>
@@ -254,10 +254,12 @@ document.getElementById('btnProductos').addEventListener('click', async () => {
             <td>{{ producto.precio }}</td>
             <td>{{ producto.descripcion }}</td>
             <td>{{ producto.stock }}</td>
-            <td class="acciones">
-                <a href="{{ url_for('actualizar_producto', id=producto.id) }}" class="btn-editar">Editar</a>
-                <a href="{{ url_for('eliminar_producto', id=producto.id) }}" class="btn-eliminar">Eliminar</a>
-            </td>
+            <td>
+              <a href="{{ url_for('editar_producto', id=producto.id) }}" class="btn-editar">Editar</a>
+            <form action="{{ url_for('eliminar_producto', id=producto.id) }}" method="POST" style="display:inline;">
+             <button type="submit" class="btn-eliminar" onclick="return confirm('¿Eliminar este producto?')">Eliminar</button>
+            </form>
+           </td>
         </tr>
         {% endfor %}
     </table>
