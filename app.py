@@ -66,7 +66,6 @@ def login():
     if Usuario.login(correo, contrasena):
         session['logueado'] = True
         session['correo'] = correo
-         print("Login exitoso, redirigiendo a /productos")
         return redirect('/productos')
 
      print("Login fallido")
