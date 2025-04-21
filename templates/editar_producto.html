@@ -2,20 +2,39 @@
 <html>
 <head>
     <title>Editar Producto</title>
-    <link rel="stylesheet" href="/static/estilos.css"> <!-- si separás los estilos -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="seccion">
-        <h2>Editar Producto</h2>
-        <form method="POST">
-            <div class="formulario">
-                <input type="text" name="nombre" value="{{ producto.nombre }}" required>
-                <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
-                <textarea name="descripcion" required>{{ producto.descripcion }}</textarea>
-                <input type="number" name="stock" value="{{ producto.stock }}" required>
-                <button type="submit">Actualizar</button>
-            </div>
-        </form>
+    <div class="container">
+        <div class="seccion">
+            <h2>Editar Producto</h2>
+            <form method="POST">
+                <div class="formulario">
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Precio:</label>
+                        <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descripción:</label>
+                        <textarea name="descripcion" rows="4" required>{{ producto.descripcion }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Stock:</label>
+                        <input type="number" name="stock" value="{{ producto.stock }}" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Actualizar</button>
+                    <a href="{{ url_for('mostrar_productos') }}" class="btn-cancelar">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>
