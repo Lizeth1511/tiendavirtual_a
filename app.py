@@ -4,16 +4,58 @@ import bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'una_clave_supersecreta'
-
-# Configuración MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'tienda_simple'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+import os
+
+db_config = {
+    'host': os.environ.get('DB_HOST'),
+    'user': os.environ.get('DB_USER'),
+    'password': os.environ.get('DB_PASSWORD'),
+    'database': os.environ.get('DB_NAME')
+}
 
 mysql = MySQL(app)
 
+import mysql.connector
+
+# Datos proporcionados por ClearDB o el servicio de tu elección
+db_config = {
+    'host': 'tu-host-cleardb',
+    'user': 'tu-usuario',
+    'password': 'tu-contraseña',
+    'database': 'tu-base-de-datos'
+}
+
+# Conexión a la base de datos
+def get_db_connection():
+    conn = mysql.connector.connect(**db_config)
+    return conn
+# Conexión y creación de tablas
+def create_tables():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        correo VARCHAR(100) NOT NULL UNIQUE,
+        contrasena VARCHAR(255) NOT NULL
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS productos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        descripcion TEXT,
+        precio DECIMAL(10,2),
+        stock INT
+    );
+    ''')
+
+    conn.commit()
+    cursor.close()
+    conn.close()
 class Usuario:
     @staticmethod
     def registrar(correo, contrasena):
