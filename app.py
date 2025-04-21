@@ -13,9 +13,6 @@ app.config['MYSQL_DB'] = 'tienda_simple'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
-with app.app_context():
-    db.create_all()  # Crea las tablas la primera vez
-
 
 class Usuario:
     @staticmethod
