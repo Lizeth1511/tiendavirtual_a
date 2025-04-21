@@ -93,9 +93,7 @@ def productos():
     conn.close()
     print("Productos encontrados:", productos)
     return render_template('productos.html', productos=productos)
- except Exception as e:
-        return "Error en productos"
-
+    
 @app.route('/tablas/<id>', methods=['GET'])
 def leer_tablas(id):
     try:
