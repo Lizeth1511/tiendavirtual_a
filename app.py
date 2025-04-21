@@ -59,10 +59,6 @@ productos = [
     {"id": 2, "nombre": "Mouse", "precio": 25.99, "stock": 50}
 ]
 
-@app.route('/')
-def home():
-    return "Bienvenido a la tienda - <a href='/productos'>Ver productos</a>"
-
 @app.route('/productos')
 def mostrar_productos():
     return render_template('productos.html', productos=productos)
@@ -110,56 +106,59 @@ def leer_tablas(id):
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
 
-@app.route('/productos', methods=['POST'])
-def registrar_producto():
-    nombre = request.form.get('nombre')
-    precio = request.form.get('precio')
-    descripcion = request.form.get('descripcion')
-    stock = request.form.get('stock')
-    if not nombre:
-        return "El campo nombre es obligatorio", 400
+@app.route('/productos')
+def mostrar_productos():
+    productos = Producto.query.all()
+    return render_template('productos.html', productos=productos)
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("INSERT INTO productos (nombre, precio, descripcion, stock) VALUES (%s, %s, %s, %s)",
-                (nombre, precio, descripcion, stock))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify({'mensaje': 'Producto creado'}), 201
-
-@app.route('/eliminar_producto/<int:id>')
-def eliminar_producto(id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM productos WHERE id = %s", (id,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    flash('Producto eliminado correctamente')
-    return redirect(url_for('productos'))
-
-@app.route('/actualizar_producto/<int:id>', methods=['GET', 'POST'])
-def actualizar_producto(id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM productos WHERE id = %s", (id,))
-    producto = cur.fetchone()
-
-    if not producto:
-        return "Producto no encontrado", 404
-
+@app.route('/agregar_producto', methods=['POST'])
+def agregar_producto():
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        precio = request.form['precio']
-        descripcion = request.form['descripcion']
-        stock = request.form['stock']
-        cur.execute("UPDATE productos SET nombre = %s, precio = %s, descripcion = %s, stock = %s WHERE id = %s",
-                    (nombre, precio, descripcion, stock, id))
-        conn.commit()
-        flash('Producto actualizado correctamente')
-        return redirect(url_for('productos'))
+        try:
+            nuevo_producto = Producto(
+                nombre=request.form['nombre'],
+                precio=float(request.form['precio']),
+                descripcion=request.form['descripcion'],
+                stock=int(request.form['stock'])
+            )
+            db.session.add(nuevo_producto)
+            db.session.commit()
+            flash('Producto agregado exitosamente', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al agregar producto: {str(e)}', 'error')
+    return redirect(url_for('mostrar_productos'))
 
+@app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
+def editar_producto(id):
+    producto = Producto.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            producto.nombre = request.form['nombre']
+            producto.precio = float(request.form['precio'])
+            producto.descripcion = request.form['descripcion']
+            producto.stock = int(request.form['stock'])
+            db.session.commit()
+            flash('Producto actualizado exitosamente', 'success')
+            return redirect(url_for('mostrar_productos'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}', 'error')
+    
+    return render_template('productos.html', producto=producto)
+
+@app.route('/eliminar-producto/<int:id>', methods=['POST'])
+def eliminar_producto(id):
+    producto = Producto.query.get_or_404(id)
+    try:
+        db.session.delete(producto)
+        db.session.commit()
+        flash('Producto eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar: {str(e)}', 'error')
+    return redirect(url_for('mostrar_productos'))
     cur.close()
     conn.close()
     return render_template('editar_producto.html', producto=producto)
