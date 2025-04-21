@@ -6,4 +6,6 @@ Werkzeug
 gunicorn
 python-dotenv # Si usas variables de entorno
 flask-sqlalchemy
+psycopg2-binary
+
 
