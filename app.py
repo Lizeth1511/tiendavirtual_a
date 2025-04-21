@@ -67,8 +67,6 @@ def login():
         session['logueado'] = True
         session['correo'] = correo
         return redirect('/productos')
-
-     print("Login fallido")
     return redirect('/')
 
 @app.route('/registro', methods=['POST'])
@@ -86,7 +84,6 @@ def registro():
 @app.route('/productos')
 def productos():
     if 'logueado' not in session:
-        print("Usuario no logueado, redirigiendo a /")
         return redirect('/')
     conn = get_db_connection()
     cur = conn.cursor()
@@ -97,7 +94,6 @@ def productos():
     print("Productos encontrados:", productos)
     return render_template('productos.html', productos=productos)
  except Exception as e:
-        print("Error cargando productos:", e)
         return "Error en productos"
 
 @app.route('/tablas/<id>', methods=['GET'])
