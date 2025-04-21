@@ -62,8 +62,7 @@ def login():
 
     if not correo or not contrasena:
           print("Correo o contraseña vacíos")
-        return redirect('/')
-
+        
     if Usuario.login(correo, contrasena):
         session['logueado'] = True
         session['correo'] = correo
