@@ -54,12 +54,18 @@ def inicio():
         return redirect('/productos')
     return render_template('login.html')
 # Ruta de productos
+productos = [
+    {"id": 1, "nombre": "Laptop", "precio": 1200.50, "stock": 10},
+    {"id": 2, "nombre": "Mouse", "precio": 25.99, "stock": 50}
+]
+
+@app.route('/')
+def home():
+    return "Bienvenido a la tienda - <a href='/productos'>Ver productos</a>"
+
 @app.route('/productos')
 def mostrar_productos():
-    [
-        {"id": 1, "nombre": "Producto Demo", "precio": 10.99}
-    ]
-if __name__ == '__main__':
+    return render_template('productos.html', productos=productos)
     app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
     
 @app.route('/login', methods=['POST'])
