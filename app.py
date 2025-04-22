@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
 
 # Configuración PostgreSQL (Render)
-DATABASE_URL = "postgresql://mi_db_tienda_user:B4hlIBoTMql6XLr3pz02BdPmx0bHtE7L@dpg-d02v0sjuibrs73b8u6u0-a/mi_db_tienda"
+DATABASE_URL = "postgresql://mi_db_tienda_user:B4hlIBoTMql6XLr3pz02BdPmx0bHtE7L@dpg-d02v0sjuibrs73b8u6u0-a.ohio-postgres.render.com/mi_db_tienda"
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
