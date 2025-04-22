@@ -2,39 +2,172 @@
 <html>
 <head>
     <title>Editar Producto</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        :root {
+            --azul-oscuro: #2c3e50;
+            --azul-medio: #3498db;
+            --azul-claro: #ecf0f1;
+            --gris-oscuro: #34495e;
+            --gris-claro: #f8f9fa;
+            --negro: #212121;
+            --blanco: #ffffff;
+            --rojo: #e74c3c;
+            --verde: #2ecc71;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--gris-claro);
+            color: var(--negro);
+            line-height: 1.6;
+        }
+        
+        .seccion {
+            background-color: var(--blanco);
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .seccion h2 {
+            color: var(--azul-oscuro);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--azul-medio);
+        }
+        
+        .formulario {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--azul-oscuro);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--azul-claro);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--azul-medio);
+            color: var(--blanco);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--gris-oscuro);
+        }
+        
+        .btn-secondary {
+            background-color: var(--gris-oscuro);
+            color: var(--blanco);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .mensaje {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+        
+        .mensaje-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        @media (max-width: 768px) {
+            .formulario {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="seccion">
-            <h2>Editar Producto</h2>
-            <form method="POST">
-                <div class="formulario">
-                    <div class="form-group">
-                        <label>Nombre:</label>
-                        <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+    <div class="seccion">
+        <h2>Editar Producto</h2>
+        
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mensaje mensaje-{{ category }}">
+                        {{ message }}
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Precio:</label>
-                        <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Descripción:</label>
-                        <textarea name="descripcion" rows="4" required>{{ producto.descripcion }}</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Stock:</label>
-                        <input type="number" name="stock" value="{{ producto.stock }}" required>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary">Actualizar</button>
-                    <a href="{{ url_for('mostrar_productos') }}" class="btn-cancelar">Cancelar</a>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="formulario">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" class="form-control" 
+                           value="{{ producto.nombre }}" required>
                 </div>
-            </form>
-        </div>
+                
+                <div class="form-group">
+                    <label for="precio">Precio:</label>
+                    <input type="number" id="precio" name="precio" step="0.01" class="form-control" 
+                           value="{{ producto.precio }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" class="form-control">{{ producto.descripcion or '' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock">Stock:</label>
+                    <input type="number" id="stock" name="stock" class="form-control" 
+                           value="{{ producto.stock }}" required>
+                </div>
+                
+                <div class="btn-group" style="grid-column: span 2;">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <a href="/productos" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
     </div>
 </body>
 </html>
