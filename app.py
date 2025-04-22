@@ -199,7 +199,9 @@ def registro():
 
 @app.route('/productos')
 def mostrar_productos():
-    # Versión sin verificación de login
+    if 'logueado' not in session:
+        flash('Debes iniciar sesión primero', 'error')
+        return redirect(url_for('inicio'))
     try:
         conn = get_db_connection()
         cur = conn.cursor()
