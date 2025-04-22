@@ -210,8 +210,6 @@ def login():
         return render_template('/login.html')
 
         if Usuario.login(correo, contrasena):
-            session['logueado'] = True
-            session['correo'] = correo
             return redirect(url_for('productos'))  # ¡Redirección clave aquí!
         
         return redirect(url_for('inicio'))
