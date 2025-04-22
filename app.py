@@ -181,7 +181,7 @@ def inicio():
     # Mostrar login/registro si no está autenticado
     if 'logueado' in session:
         return redirect('/productos')
-    return render_template('login.html')  # Necesitas crear este template
+    return render_template('login.html')  
 
 @app.route('/login', methods=['GET', 'POST'])  # Agregar método GET
 def login():
@@ -193,7 +193,7 @@ def login():
 @app.route('/registro', methods=['GET', 'POST'])  # Agregar método GET
 def registro():
     if request.method == 'GET':
-        return render_template('registro.html')  # Crear este template
+        return render_template('login.html')  
 
 @app.route('/nuevo_producto')
 def nuevo_producto():
