@@ -186,11 +186,7 @@ def inicio():
 @app.route('/login', methods=['GET', 'POST'])  # Agregar método GET
 def login():
     if request.method == 'GET':
-    correo = request.form.get('correo')
-    contraseña = request.form.get('contrasena')
       return render_template('login.html')
-    
-    # El resto del código POST existente...
 
 @app.route('/registro', methods=['GET', 'POST'])  # Agregar método GET
 def registro():
