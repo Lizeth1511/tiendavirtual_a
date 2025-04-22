@@ -226,29 +226,28 @@
     </style>
 </head>
 <body>
+    <div class="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}" style="padding: 15px; margin: 10px 0; border-radius: 5px; min-width: 300px;
+                    {% if category == 'success' %}
+                        background: #d4edda; border: 1px solid #c3e6cb; color: #155724;
+                    {% elif category == 'error' %}
+                        background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
     <div class="main-container">
         <!-- Sección de gradiente -->
         <div class="gradient-section">
             <div class="gradient-content">
                 <h1>Accede a tu cuenta</h1>
             </div>
-        </div>
-        <!-- Mensajes Flash -->
-        <div class="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="flash {{ category }}" style="padding: 15px; margin: 10px 0; border-radius: 5px; min-width: 300px;
-                            {% if category == 'success' %}
-                                background: #d4edda; border: 1px solid #c3e6cb; color: #155724;
-                            {% elif category == 'error' %}
-                                background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;
-                            {% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
         </div>
         <!-- Sección de formularios -->
         <div class="form-section">
@@ -273,12 +272,8 @@
                     <button type="submit" class="btn btn-primary">Ingresar</button>
                 </form>
 
-                <!-- Formulario de Registro -->
+                              <!-- En el formulario de registro -->
                 <form id="register-form" action="/registro" method="post" class="auth-form">
-                    <div class="form-group">
-                        <label for="name">Nombre completo</label>
-                        <input type="text" id="name" name="nombre" class="form-control" placeholder="Tu nombre" required>
-                    </div>
                     <div class="form-group">
                         <label for="new-email">Correo electrónico</label>
                         <input type="email" id="new-email" name="correo" class="form-control" placeholder="tucorreo@ejemplo.com" required>
