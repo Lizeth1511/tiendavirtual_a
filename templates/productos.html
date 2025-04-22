@@ -3,7 +3,6 @@
 <head>
     <title>Productos</title>
     <style>
-        /* Estilos generales */
         :root {
             --azul-oscuro: #2c3e50;
             --azul-medio: #3498db;
@@ -13,6 +12,7 @@
             --negro: #212121;
             --blanco: #ffffff;
             --rojo: #e74c3c;
+            --verde: #2ecc71;
         }
         
         body {
@@ -25,7 +25,6 @@
             line-height: 1.6;
         }
         
-        /* Header */
         .header {
             background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), 
                         url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
@@ -58,53 +57,14 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
         
-        /* Formulario */
         .seccion {
             background-color: var(--blanco);
             padding: 2rem;
             border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
-        } 
-        /* Estilos para botones de acciones */
-.acciones {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-editar, .btn-eliminar {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    text-decoration: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-editar {
-    background-color: #3498db;
-}
-
-.btn-editar:hover {
-    background-color: #2980b9;
-}
-
-.btn-eliminar {
-    background-color: #e74c3c;
-}
-
-.btn-eliminar:hover {
-    background-color: #c0392b;
-}
-
-/* Ajuste para la columna de acciones */
-table th:nth-child(6),
-table td:nth-child(6) {
-    width: 180px;
-    text-align: center;
-}
+        }
+        
         .seccion h2 {
             color: var(--azul-oscuro);
             margin-top: 0;
@@ -119,8 +79,18 @@ table td:nth-child(6) {
             gap: 1rem;
         }
         
-        .formulario input,
-        .formulario textarea {
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--azul-oscuro);
+        }
+        
+        .form-control {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--azul-claro);
@@ -128,32 +98,58 @@ table td:nth-child(6) {
             font-size: 1rem;
         }
         
-        .formulario textarea {
-            grid-column: span 2;
-            min-height: 80px;
+        textarea.form-control {
+            min-height: 100px;
             resize: vertical;
         }
         
-        .formulario button {
-            grid-column: span 2;
-            background-color: var(--azul-medio);
-            color: var(--blanco);
+        .btn {
+            padding: 0.75rem 1.5rem;
             border: none;
-            padding: 0.75rem;
             border-radius: 4px;
-            cursor: pointer;
             font-size: 1rem;
-            transition: background-color 0.3s;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
         
-        .formulario button:hover {
+        .btn-primary {
+            background-color: var(--azul-medio);
+            color: var(--blanco);
+        }
+        
+        .btn-primary:hover {
             background-color: var(--gris-oscuro);
         }
         
-        /* Tabla */
-        h3 {
-            color: var(--azul-oscuro);
-            margin: 1.5rem 0;
+        .btn-success {
+            background-color: var(--verde);
+            color: var(--blanco);
+        }
+        
+        .btn-danger {
+            background-color: var(--rojo);
+            color: var(--blanco);
+        }
+        
+        .mensaje {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+        
+        .mensaje-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        .mensaje-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
         }
         
         table {
@@ -179,154 +175,112 @@ table td:nth-child(6) {
             background-color: var(--azul-claro);
         }
         
-        /* Responsive */
+        .acciones {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
         @media (max-width: 768px) {
             .formulario {
                 grid-template-columns: 1fr;
-            }
-            
-            .formulario textarea,
-            .formulario button {
-                grid-column: span 1;
             }
             
             .header {
                 padding: 2rem 1rem;
             }
         }
-    </style> 
-<script>
-document.getElementById('btnProductos').addEventListener('click', async () => {
-    try {
-        const response = await fetch('https://tiendavirtual-a-15.onrender.com/productos');
-        const productos = await response.json();
-        
-        let html = '<h2>Productos</h2><ul>';
-        productos.forEach(p => {
-            html += `<li>${p.nombre} - $${p.precio}</li>`;
-        });
-        html += '</ul>';
-        
-        document.getElementById('lista-productos').innerHTML = html;
-    } catch (error) {
-        console.error('Error:', error);
-    }
-});
-</script>
+    </style>
 </head>
 <body>
     <div class="header">
         <h2>Bienvenido, {{ session.correo }}</h2>
         <a href="/logout" class="logout-link">Cerrar sesión</a>
     </div>
+    
     <div class="container">
-        <!-- Sección de Agregar Producto -->
-        <div class="formulario-crud">
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mensaje mensaje-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Formulario para agregar producto -->
+        <div class="seccion">
             <h2>Agregar Nuevo Producto</h2>
-            <form method="POST" action="/agregar-producto">
-                <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" name="nombre" required>
+            <form method="POST" action="/agregar_producto">
+                <div class="formulario">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precio">Precio:</label>
+                        <input type="number" id="precio" name="precio" step="0.01" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stock">Stock:</label>
+                        <input type="number" id="stock" name="stock" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: span 2;">
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Precio:</label>
-                    <input type="number" name="precio" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Descripción:</label>
-                    <textarea name="descripcion" rows="3" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Stock:</label>
-                    <input type="number" name="stock" required>
-                </div>
-
-                <button type="submit" class="btn btn-guardar">Guardar Producto</button>
             </form>
         </div>
-
-        <!-- Lista de Productos -->
-        <h2>Productos Existentes</h2>
-        <table class="tabla-productos">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Descripción</th>
-                    <th>Stock</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr>
-                    <td>{{ producto.nombre }}</td>
-                    <td>${{ producto.precio }}</td>
-                    <td>{{ producto.descripcion }}</td>
-                    <td>{{ producto.stock }}</td>
-                    <td>
-                        <a href="/editar_producto/{{ producto.id }}" class="btn btn-editar">Editar</a>
-                        <form action="/eliminar_producto/{{ producto.id }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-eliminar" 
-                                    onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
-                                Eliminar
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal de Edición (Usando tu template) -->
-    <div id="modalEdicion" class="modal">
-        <div class="modal-contenido">
-            {% if producto %}
-            <h2>Editar Producto</h2>
-            <form method="POST" action="/editar_producto/{{ producto.id }}">
-                <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" name="nombre" value="{{ producto.nombre }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Precio:</label>
-                    <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Descripción:</label>
-                    <textarea name="descripcion" required>{{ producto.descripcion }}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Stock:</label>
-                    <input type="number" name="stock" value="{{ producto.stock }}" required>
-                </div>
-
-                <button type="submit" class="btn btn-guardar">Actualizar</button>
-                <button type="button" class="btn btn-eliminar" 
-                        onclick="document.getElementById('modalEdicion').style.display='none'">
-                    Cancelar
-                </button>
-            </form>
+        
+        <!-- Lista de productos -->
+        <div class="seccion">
+            <h2>Productos Existentes</h2>
+            {% if productos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Descripción</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                        <tr>
+                            <td>{{ producto.nombre }}</td>
+                            <td>${{ "%.2f"|format(producto.precio) }}</td>
+                            <td>{{ producto.descripcion or 'N/A' }}</td>
+                            <td>{{ producto.stock }}</td>
+                            <td>
+                                <div class="acciones">
+                                    <a href="/editar_producto/{{ producto.id }}" class="btn btn-primary">Editar</a>
+                                    <form action="/eliminar_producto/{{ producto.id }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger" 
+                                                onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No hay productos registrados.</p>
             {% endif %}
         </div>
     </div>
-
-    <script>
-        // Mostrar modal al hacer clic en Editar
-        document.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('modalEdicion').style.display = 'flex';
-                window.location.href = btn.href;
-            });
-        });
-    </script>
 </body>
 </html>
