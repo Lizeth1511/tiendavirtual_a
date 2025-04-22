@@ -189,35 +189,37 @@ def login():
         contrasena = request.form['contrasena'].strip()
 
         if not correo or not contrasena:
-            flash('Correo y contraseña son requeridos', 'error')
-            return redirect('/')
+            flash('Por favor completa todos los campos', 'error')
+            return render_template('login.html')
 
         usuario = Usuario.login(correo, contrasena)
+        
         if usuario:
             session['logueado'] = True
             session['correo'] = correo
             session['usuario_id'] = usuario['id']
-            return redirect('/productos')
+            flash('¡Bienvenido!', 'success')
+            return redirect(url_for('mostrar_productos'))
         
         flash('Credenciales incorrectas', 'error')
-    return redirect('/')
+    
+    return render_template('login.html')
 
-@app.route('/registro', methods=['GET', 'POST'])
+@app.route('/registro', methods=['POST'])
 def registro():
-    if request.method == 'POST':
-        correo = request.form['correo'].strip()
-        contrasena = request.form['contrasena'].strip()
+    correo = request.form['correo'].strip()
+    contrasena = request.form['contrasena'].strip()
 
-        if not correo or not contrasena:
-            flash('Correo y contraseña son requeridos', 'error')
-            return redirect('/')
+    if not correo or not contrasena:
+        flash('Por favor completa todos los campos', 'error')
+        return redirect(url_for('inicio'))
 
-        if Usuario.registrar(correo, contrasena):
-            flash('Registro exitoso. Por favor inicia sesión.', 'success')
-            return redirect('/')
-        
+    if Usuario.registrar(correo, contrasena):
+        flash('Registro exitoso. Por favor inicia sesión.', 'success')
+    else:
         flash('El correo ya está registrado', 'error')
-    return redirect('/')
+    
+    return redirect(url_for('inicio'))
 
 @app.route('/productos')
 def mostrar_productos():
