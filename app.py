@@ -182,29 +182,6 @@ def inicio():
         return redirect('/productos')
     return render_template('login.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        correo = request.form['correo'].strip()
-        contrasena = request.form['contrasena'].strip()
-
-        if not correo or not contrasena:
-            flash('Por favor completa todos los campos', 'error')
-            return render_template('login.html')
-
-        usuario = Usuario.login(correo, contrasena)
-        
-        if usuario:
-            session['logueado'] = True
-            session['correo'] = correo
-            session['usuario_id'] = usuario['id']
-            flash('¡Bienvenido!', 'success')
-            return redirect(url_for('mostrar_productos'))
-        
-        flash('Credenciales incorrectas', 'error')
-    
-    return render_template('login.html')
-
 @app.route('/registro', methods=['POST'])
 def registro():
     correo = request.form['correo'].strip()
@@ -221,37 +198,47 @@ def registro():
     
     return redirect(url_for('inicio'))
 
+
 @app.route('/productos')
 def mostrar_productos():
+    # Verificar si el usuario está autenticado
     if 'logueado' not in session:
-        return redirect('/')
+        flash('Debes iniciar sesión para ver los productos', 'error')
+        return redirect(url_for('inicio'))
     
-    usuario_id = session.get('usuario_id')
-    productos = Producto.obtener_todos(usuario_id)
+    # Obtener productos de la base de datos
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM productos")
+        productos = cur.fetchall()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print("Error al obtener productos:", e)
+        productos = []
+    
     return render_template('productos.html', productos=productos)
 
-@app.route('/agregar_producto', methods=['POST'])
-def agregar_producto():
-    if 'logueado' not in session:
-        return redirect('/')
-    
-    if request.method == 'POST':
-        nombre = request.form['nombre'].strip()
-        descripcion = request.form['descripcion'].strip()
-        precio = float(request.form['precio'])
-        stock = int(request.form['stock'])
-        usuario_id = session.get('usuario_id')
+@app.route('/login', methods=['POST'])
+def login():
+    correo = request.form['correo'].strip()
+    contrasena = request.form['contrasena'].strip()
 
-        if not nombre or not precio or stock < 0:
-            flash('Datos del producto inválidos', 'error')
-            return redirect('/productos')
+    if not correo or not contrasena:
+        flash('Por favor completa todos los campos', 'error')
+        return redirect(url_for('inicio'))
 
-        if Producto.crear(nombre, descripcion, precio, stock, usuario_id):
-            flash('Producto agregado exitosamente', 'success')
-        else:
-            flash('Error al agregar producto', 'error')
+    usuario = Usuario.login(correo, contrasena)
+    if usuario:
+        session['logueado'] = True
+        session['correo'] = correo
+        session['usuario_id'] = usuario['id']
+        return redirect(url_for('mostrar_productos'))
     
-    return redirect('/productos')
+    flash('Credenciales incorrectas', 'error')
+    return redirect(url_for('inicio'))
+
 
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 def editar_producto(id):
