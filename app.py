@@ -183,15 +183,39 @@ def inicio():
         return redirect('/productos')
     return render_template('login.html')  
 
-@app.route('/login', methods=['GET', 'POST'])  # Agregar método GET
-def login():
-    if request.method == 'GET':
-      return render_template('login.html')
 
-@app.route('/registro', methods=['GET', 'POST'])  # Agregar método GET
+# Permitir GET y POST para manejar redirecciones
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        correo = request.form.get('correo', '').strip()
+        contrasena = request.form.get('contrasena', '').strip()
+        
+        if not correo or not contrasena:
+            flash('Todos los campos son obligatorios', 'error')
+            return redirect(url_for('inicio'))
+        
+        if Usuario.login(correo, contrasena):
+            session['logueado'] = True
+            session['correo'] = correo
+            return redirect(url_for('productos'))  # ¡Redirección clave aquí!
+        
+        return redirect(url_for('inicio'))
+    
+    return redirect(url_for('inicio'))  # Si es GET, redirige al home
+
+@app.route('/registro', methods=['POST'])
 def registro():
-    if request.method == 'GET':
-        return render_template('login.html')  
+    correo = request.form['correo'].strip()
+    contrasena = request.form['contrasena'].strip()
+    
+    if not correo or not contrasena:
+        flash('Campos obligatorios', 'error')
+        return redirect('/')
+    
+    if Usuario.registrar(correo, contrasena):
+        return redirect('/')
+    return redirect('/')
 
 @app.route('/nuevo_producto')
 def nuevo_producto():
