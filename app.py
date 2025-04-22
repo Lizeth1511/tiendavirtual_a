@@ -15,6 +15,29 @@ def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
 
 def create_tables():
+    """Crear tablas si no existen"""
+    commands = (
+        """
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            correo VARCHAR(255) UNIQUE NOT NULL,
+            contrasena VARCHAR(255) NOT NULL,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS productos (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(255) NOT NULL,
+            descripcion TEXT,
+            precio DECIMAL(10, 2) NOT NULL,
+            stock INTEGER NOT NULL,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+        """
+    )
+    
     try:
         conn = get_db_connection()
         cur = conn.cursor()
