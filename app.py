@@ -178,24 +178,28 @@ class Producto:
 # Rutas de la aplicación
 @app.route('/')
 def inicio():
-    # Redirección modificada para acceso público
-    return redirect('/productos')
+    # Mostrar login/registro si no está autenticado
+    if 'logueado' in session:
+        return redirect('/productos')
+    return render_template('login.html')  # Necesitas crear este template
 
-@app.route('/registro', methods=['POST'])
-def registro():
-    correo = request.form['correo'].strip()
-    contrasena = request.form['contrasena'].strip()
-
-    if not correo or not contrasena:
-        flash('Por favor completa todos los campos', 'error')
-        return redirect(url_for('inicio'))
-
-    if Usuario.registrar(correo, contrasena):
-        flash('Registro exitoso. Por favor inicia sesión.', 'success')
-    else:
-        flash('El correo ya está registrado', 'error')
+@app.route('/login', methods=['GET', 'POST'])  # Agregar método GET
+def login():
+    if request.method == 'GET':
+      return render_template('login.html')
     
-    return redirect(url_for('inicio'))
+    # El resto del código POST existente...
+
+@app.route('/registro', methods=['GET', 'POST'])  # Agregar método GET
+def registro():
+    if request.method == 'GET':
+        return render_template('registro.html')  # Crear este template
+
+@app.route('/nuevo_producto')
+def nuevo_producto():
+    if 'logueado' not in session:
+        return redirect('/login')
+    return render_template('nuevo_producto.html')
 
 @app.route('/productos')
 def mostrar_productos():
@@ -211,25 +215,6 @@ def mostrar_productos():
         productos = []
     
     return render_template('productos.html', productos=productos)
-
-@app.route('/login', methods=['POST'])
-def login():
-    correo = request.form['correo'].strip()
-    contrasena = request.form['contrasena'].strip()
-
-    if not correo or not contrasena:
-        flash('Por favor completa todos los campos', 'error')
-        return redirect(url_for('inicio'))
-
-    usuario = Usuario.login(correo, contrasena)
-    if usuario:
-        session['logueado'] = True
-        session['correo'] = correo
-        session['usuario_id'] = usuario['id']
-        return redirect(url_for('mostrar_productos'))
-    
-    flash('Credenciales incorrectas', 'error')
-    return redirect(url_for('inicio'))
 
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
