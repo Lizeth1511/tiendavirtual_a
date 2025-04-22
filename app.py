@@ -8,7 +8,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
 
-# Configuración PostgreSQL
+# Configuración PostgreSQL (Render)
 DATABASE_URL = "postgresql://mi_db_tienda_user:B4hlIBoTMql6XLr3pz02BdPmx0bHtE7L@dpg-d02v0sjuibrs73b8u6u0-a/mi_db_tienda"
 
 def get_db_connection():
@@ -178,9 +178,8 @@ class Producto:
 # Rutas de la aplicación
 @app.route('/')
 def inicio():
-    if 'logueado' in session:
-        return redirect('/productos')
-    return render_template('login.html')
+    # Redirección modificada para acceso público
+    return redirect('/productos')
 
 @app.route('/registro', methods=['POST'])
 def registro():
@@ -198,10 +197,9 @@ def registro():
     
     return redirect(url_for('inicio'))
 
-
 @app.route('/productos')
 def mostrar_productos():
-    # Obtener productos de la base de datos
+    # Versión sin verificación de login
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -233,7 +231,6 @@ def login():
     
     flash('Credenciales incorrectas', 'error')
     return redirect(url_for('inicio'))
-
 
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 def editar_producto(id):
