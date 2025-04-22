@@ -185,7 +185,7 @@ def inicio():
 
 
 # Permitir GET y POST para manejar redirecciones
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/productos', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         correo = request.form.get('correo', '').strip()
