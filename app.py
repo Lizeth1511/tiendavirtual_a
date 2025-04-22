@@ -194,7 +194,21 @@ def login():
         if not correo or not contrasena:
             flash('Todos los campos son obligatorios', 'error')
             return redirect(url_for('inicio'))
-        
+            
+        logged_user = ModelUser.login(db, usuario)
+        if logged_user != None:
+            if logged_user.password:
+                login_user(logged_user)
+                return redirect(url_for('inicio'))
+            else:
+                flash("Invalid password...")
+                return render_template('/login.html')
+        else:
+            flash("User not found...")
+            return render_template('/login.html')
+    else:
+        return render_template('/login.html')
+
         if Usuario.login(correo, contrasena):
             session['logueado'] = True
             session['correo'] = correo
