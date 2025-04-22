@@ -201,11 +201,6 @@ def registro():
 
 @app.route('/productos')
 def mostrar_productos():
-    # Verificar si el usuario está autenticado
-    if 'logueado' not in session:
-        flash('Debes iniciar sesión para ver los productos', 'error')
-        return redirect(url_for('inicio'))
-    
     # Obtener productos de la base de datos
     try:
         conn = get_db_connection()
