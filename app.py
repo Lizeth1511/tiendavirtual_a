@@ -3,15 +3,51 @@ import psycopg2
 import psycopg2.extras
 import bcrypt
 import os
+from datetime import datetime
 
 app = Flask(__name__)
-
 app.secret_key = os.getenv("SECRET_KEY", "fallback_clave_insegura")
+
 # Configuración PostgreSQL
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = "postgresql://mi_db_tienda_user:B4hlIBoTMql6XLr3pz02BdPmx0bHtE7L@dpg-d02v0sjuibrs73b8u6u0-a/mi_db_tienda"
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+
+def create_tables():
+    """Crear tablas si no existen"""
+    commands = (
+        """
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            correo VARCHAR(255) UNIQUE NOT NULL,
+            contrasena VARCHAR(255) NOT NULL,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS productos (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(255) NOT NULL,
+            descripcion TEXT,
+            precio DECIMAL(10, 2) NOT NULL,
+            stock INTEGER NOT NULL,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            usuario_id INTEGER REFERENCES usuarios(id)
+        )
+        """
+    )
+    
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        for command in commands:
+            cur.execute(command)
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error al crear tablas: {e}")
 
 class Usuario:
     @staticmethod
@@ -23,14 +59,18 @@ class Usuario:
             if cur.fetchone():
                 return False
             
-            hashed = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
-            cur.execute("INSERT INTO usuarios (correo, contrasena) VALUES (%s, %s)", (correo, hashed))
+            hashed = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cur.execute(
+                "INSERT INTO usuarios (correo, contrasena) VALUES (%s, %s) RETURNING id", 
+                (correo, hashed)
+            )
+            user_id = cur.fetchone()['id']
             conn.commit()
             cur.close()
             conn.close()
-            return True
+            return user_id
         except Exception as e:
-            print("Error:", e)
+            print("Error al registrar:", e)
             return False
 
     @staticmethod
@@ -42,124 +82,215 @@ class Usuario:
             usuario = cur.fetchone()
             cur.close()
             conn.close()
+            
             if usuario and bcrypt.checkpw(contrasena.encode('utf-8'), usuario['contrasena'].encode('utf-8')):
-                return True
+                return usuario
         except Exception as e:
-            print("Error:", e)
-        return False
+            print("Error al iniciar sesión:", e)
+        return None
 
+class Producto:
+    @staticmethod
+    def obtener_todos(usuario_id=None):
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            
+            if usuario_id:
+                cur.execute("SELECT * FROM productos WHERE usuario_id = %s ORDER BY id", (usuario_id,))
+            else:
+                cur.execute("SELECT * FROM productos ORDER BY id")
+                
+            productos = cur.fetchall()
+            cur.close()
+            conn.close()
+            return productos
+        except Exception as e:
+            print("Error al obtener productos:", e)
+            return []
+
+    @staticmethod
+    def obtener_por_id(id):
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM productos WHERE id = %s", (id,))
+            producto = cur.fetchone()
+            cur.close()
+            conn.close()
+            return producto
+        except Exception as e:
+            print("Error al obtener producto:", e)
+            return None
+
+    @staticmethod
+    def crear(nombre, descripcion, precio, stock, usuario_id):
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """INSERT INTO productos (nombre, descripcion, precio, stock, usuario_id) 
+                VALUES (%s, %s, %s, %s, %s) RETURNING id""",
+                (nombre, descripcion, precio, stock, usuario_id)
+            )
+            producto_id = cur.fetchone()['id']
+            conn.commit()
+            cur.close()
+            conn.close()
+            return producto_id
+        except Exception as e:
+            print("Error al crear producto:", e)
+            return False
+
+    @staticmethod
+    def actualizar(id, nombre, descripcion, precio, stock):
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """UPDATE productos 
+                SET nombre = %s, descripcion = %s, precio = %s, stock = %s 
+                WHERE id = %s""",
+                (nombre, descripcion, precio, stock, id)
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            print("Error al actualizar producto:", e)
+            return False
+
+    @staticmethod
+    def eliminar(id):
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM productos WHERE id = %s", (id,))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            print("Error al eliminar producto:", e)
+            return False
+
+# Rutas de la aplicación
 @app.route('/')
 def inicio():
     if 'logueado' in session:
         return redirect('/productos')
     return render_template('login.html')
-# Ruta de productos
-productos = [
-    {"id": 1, "nombre": "Laptop", "precio": 1200.50, "stock": 10},
-    {"id": 2, "nombre": "Mouse", "precio": 25.99, "stock": 50}
-]
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        correo = request.form['correo'].strip()
+        contrasena = request.form['contrasena'].strip()
+
+        if not correo or not contrasena:
+            flash('Correo y contraseña son requeridos', 'error')
+            return redirect('/')
+
+        usuario = Usuario.login(correo, contrasena)
+        if usuario:
+            session['logueado'] = True
+            session['correo'] = correo
+            session['usuario_id'] = usuario['id']
+            return redirect('/productos')
+        
+        flash('Credenciales incorrectas', 'error')
+    return redirect('/')
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        correo = request.form['correo'].strip()
+        contrasena = request.form['contrasena'].strip()
+
+        if not correo or not contrasena:
+            flash('Correo y contraseña son requeridos', 'error')
+            return redirect('/')
+
+        if Usuario.registrar(correo, contrasena):
+            flash('Registro exitoso. Por favor inicia sesión.', 'success')
+            return redirect('/')
+        
+        flash('El correo ya está registrado', 'error')
+    return redirect('/')
 
 @app.route('/productos')
 def mostrar_productos():
-     productos = Producto.query.all()
-    return render_template('productos.html', productos=productos)
-
-
-    app.run(host='dpg-d02v0sjuibrs73b8u6u0-a', port=5432)
+    if 'logueado' not in session:
+        return redirect('/')
     
-@app.route('/login', methods=['POST'])
-def login():
-    correo = request.form['correo'].strip()
-    contrasena = request.form['contrasena'].strip()
-
-    if not correo or not contrasena:
-          print("Correo o contraseña vacíos")
-        
-    if Usuario.login(correo, contrasena):
-        session['logueado'] = True
-        session['correo'] = correo
-        return redirect('/productos')
-    return redirect('/')
-
-@app.route('/registro', methods=['POST'])
-def registro():
-    correo = request.form['correo'].strip()
-    contrasena = request.form['contrasena'].strip()
-
-    if not correo or not contrasena:
-        return redirect('/')
-
-    if Usuario.registrar(correo, contrasena):
-        return redirect('/')
-    return redirect('/')
-
-@app.route('/productos/<id>', methods=['GET'])
-def leer_tablas(id):
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, nombre, descripcion, precio, stock FROM productos WHERE id = %s", (id,))
-        datos = cur.fetchone()
-        cur.close()
-        conn.close()
-        if datos:
-            return jsonify({'producto': datos, 'mensaje': "Producto encontrado."})
-        else:
-            return jsonify({'mensaje': "Producto no encontrado."})
-    except Exception as ex:
-        return jsonify({'mensaje': "Error"})
+    usuario_id = session.get('usuario_id')
+    productos = Producto.obtener_todos(usuario_id)
+    return render_template('productos.html', productos=productos)
 
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
+    if 'logueado' not in session:
+        return redirect('/')
+    
     if request.method == 'POST':
-        try:
-            nuevo_producto = Producto(
-                nombre=request.form['nombre'],
-                precio=float(request.form['precio']),
-                descripcion=request.form['descripcion'],
-                stock=int(request.form['stock'])
-            )
-            db.session.add(nuevo_producto)
-            db.session.commit()
+        nombre = request.form['nombre'].strip()
+        descripcion = request.form['descripcion'].strip()
+        precio = float(request.form['precio'])
+        stock = int(request.form['stock'])
+        usuario_id = session.get('usuario_id')
+
+        if not nombre or not precio or stock < 0:
+            flash('Datos del producto inválidos', 'error')
+            return redirect('/productos')
+
+        if Producto.crear(nombre, descripcion, precio, stock, usuario_id):
             flash('Producto agregado exitosamente', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al agregar producto: {str(e)}', 'error')
-    return redirect(url_for('mostrar_productos'))
+        else:
+            flash('Error al agregar producto', 'error')
+    
+    return redirect('/productos')
 
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 def editar_producto(id):
-    producto = Producto.query.get_or_404(id)
+    if 'logueado' not in session:
+        return redirect('/')
+    
+    producto = Producto.obtener_por_id(id)
+    
+    if not producto:
+        flash('Producto no encontrado', 'error')
+        return redirect('/productos')
     
     if request.method == 'POST':
-        try:
-            producto.nombre = request.form['nombre']
-            producto.precio = float(request.form['precio'])
-            producto.descripcion = request.form['descripcion']
-            producto.stock = int(request.form['stock'])
-            db.session.commit()
-            flash('Producto actualizado exitosamente', 'success')
-            return redirect(url_for('mostrar_productos'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al actualizar: {str(e)}', 'error')
-    
-    return render_template('productos.html', producto=producto)
+        nombre = request.form['nombre'].strip()
+        descripcion = request.form['descripcion'].strip()
+        precio = float(request.form['precio'])
+        stock = int(request.form['stock'])
 
-@app.route('/eliminar-producto/<int:id>', methods=['POST'])
-def eliminar_producto(id):
-    producto = Producto.query.get_or_404(id)
-    try:
-        db.session.delete(producto)
-        db.session.commit()
-        flash('Producto eliminado exitosamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error al eliminar: {str(e)}', 'error')
-    return redirect(url_for('mostrar_productos'))
-    cur.close()
-    conn.close()
+        if not nombre or not precio or stock < 0:
+            flash('Datos del producto inválidos', 'error')
+            return redirect(f'/editar_producto/{id}')
+
+        if Producto.actualizar(id, nombre, descripcion, precio, stock):
+            flash('Producto actualizado exitosamente', 'success')
+            return redirect('/productos')
+        else:
+            flash('Error al actualizar producto', 'error')
+    
     return render_template('editar_producto.html', producto=producto)
+
+@app.route('/eliminar_producto/<int:id>', methods=['POST'])
+def eliminar_producto(id):
+    if 'logueado' not in session:
+        return redirect('/')
+    
+    if Producto.eliminar(id):
+        flash('Producto eliminado exitosamente', 'success')
+    else:
+        flash('Error al eliminar producto', 'error')
+    
+    return redirect('/productos')
 
 @app.route('/logout')
 def logout():
@@ -167,4 +298,5 @@ def logout():
     return redirect('/')
 
 if __name__ == '__main__':
+    create_tables()
     app.run(debug=False)
