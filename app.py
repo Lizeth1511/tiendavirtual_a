@@ -232,6 +232,40 @@ def login():
     flash('Credenciales incorrectas', 'error')
     return redirect(url_for('inicio'))
 
+@app.route('/agregar_producto', methods=['POST'])
+def agregar_producto():
+    if 'logueado' not in session:
+        flash('Debes iniciar sesión para realizar esta acción', 'error')
+        return redirect(url_for('inicio'))
+    
+    nombre = request.form['nombre'].strip()
+    descripcion = request.form['descripcion'].strip()
+    precio = request.form['precio'].strip()
+    stock = request.form['stock'].strip()
+    usuario_id = session['usuario_id']
+
+    # Validaciones
+    if not nombre or not precio or not stock:
+        flash('Todos los campos requeridos deben estar llenos', 'error')
+        return redirect(url_for('mostrar_productos'))
+
+    try:
+        precio = float(precio)
+        stock = int(stock)
+        if precio <= 0 or stock < 0:
+            raise ValueError
+    except ValueError:
+        flash('Datos numéricos inválidos', 'error')
+        return redirect(url_for('mostrar_productos'))
+
+    if Producto.crear(nombre, descripcion, precio, stock, usuario_id):
+        flash('Producto creado exitosamente', 'success')
+    else:
+        flash('Error al crear el producto', 'error')
+    
+    return redirect(url_for('mostrar_productos'))
+
+
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 def editar_producto(id):
     if 'logueado' not in session:
